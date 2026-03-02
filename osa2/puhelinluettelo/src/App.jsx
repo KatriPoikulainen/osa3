@@ -1,30 +1,34 @@
 import { useState,useEffect } from 'react'
 import noteService from './services/notes'
+import Notification from './components/Notification'
 
-const Filter = (props) => (
+const Filter = ({ filter, handleFilterChange }) => (
   <div>
     filter shown with:{' '}
-    <input
-      value={props.filter}
-      onChange={props.handleFilterChange}
-        />
+    <input value={filter} onChange={handleFilterChange} />
   </div>
 )
 
-const PersonForm = (props) => (
-  <form onSubmit={props.addPerson}>
+const PersonForm = ({
+  addPerson,
+  newName,
+  handleNameChange,
+  newNumber,
+  handleNumberChange
+}) => (
+  <form onSubmit={addPerson}>
         <div>
           name:{' '}
           <input 
-          value= {props.newName}
-          onChange={props.handleNameChange}
+          value= {newName}
+          onChange={handleNameChange}
           />
         </div>
         <div>
           number:{' '}
           <input 
-          value= {props.newNumber}
-          onChange={props.handleNumberChange}/>
+          value= {newNumber}
+          onChange={handleNumberChange}/>
         </div>
         <div>
           <button type="submit">add</button>
@@ -32,12 +36,12 @@ const PersonForm = (props) => (
       </form>
 )
 
-const Persons = (props) => (
+const Persons = ({ personsToShow, deletePerson }) => (
   <ul>
-    {props.personsToShow.map((person)=> (
+    {personsToShow.map((person)=> (
       <li key={person.id}>
-        {person.name} {person.number}
-        <button onClick={() => props.deletePerson(person.id)}>
+        {person.name} {person.number}{' '}
+        <button onClick={() => deletePerson(person.id)}>
           delete
         </button>
       </li>
@@ -53,6 +57,15 @@ const [filter, setFilter] = useState('')
 const [newName, setNewName] = useState('')
 const [newNumber, setNewNumber] = useState ('')
 
+const [notification, setNotification] = useState({message: null, type: null})
+
+const showNotification = (message, type) => {
+  setNotification({ message, type })
+  setTimeout(() => {
+    setNotification({ message: null, type: null })
+  }, 5000)
+}
+
   useEffect(()=> {
     noteService.getAll().then((response) => {
       setPersons(response.data)
@@ -65,23 +78,37 @@ const [newNumber, setNewNumber] = useState ('')
     const name = newName.trim()
     const number = newNumber.trim()
 
-    const existingPerson = persons.find((person)=> person.name === name)
+      if (name === '' || number === '') {
+      showNotification('Name and number must not be empty', 'error')
+      return
+    }
+
+    const existingPerson = persons.find((p)=> p.name === name)
 
     if (existingPerson) {
       const ok = window.confirm(
         `${name} is already added to phonebook, replace the old number with a new one?`
       )
-      if (!ok) {
-        return
-      }
+      if (!ok) return
+
       const updatedPerson = {...existingPerson, number}
 
-      noteService.update(existingPerson.id, updatedPerson).then((response) => {
-        setPersons(
-          persons.map((p) => (p.id !== existingPerson.id ? p : response.data))
-      ) 
+      noteService
+      .update(existingPerson.id, updatedPerson)
+      .then((response) => {
+      setPersons(
+      persons.map((p) => (p.id !== existingPerson.id ? p : response.data))
+      )
       setNewName('')
       setNewNumber('')
+      showNotification(`Updated ${response.data.name}`, 'success')
+    })
+      .catch ((error) => {
+          showNotification(
+            `Information of '${existingPerson.name}' was already removed from server`,
+            'error'
+          )
+        setPersons(persons.filter((p) => p.id !== existingPerson.id))
       })
       return
     }
@@ -93,29 +120,42 @@ const [newNumber, setNewNumber] = useState ('')
     }
 
 
-    noteService.create(personObject).then((response) => {
+    noteService
+    .create(personObject)
+    .then((response) => {
       setPersons(persons.concat(response.data))
       setNewName('')
       setNewNumber('')
-    })
+        showNotification(`Added ${response.data.name}`, 'success')
+      })
+      .catch((error) => {
+        showNotification('Adding a person failed', 'error')
+      })
   }
+
 
       
   const deletePerson = (id) => {
-  const person = persons.find(p => p.id === id)
+  const person = persons.find((p) => p.id === id)
   if (!person) return
-  const ok = window.confirm(
-    `Delete ${person.name}?`
-  )
 
-  if (!ok) {
-    return
+  const ok = window.confirm(`Delete ${person.name}?`)
+  if (!ok) return
+
+  noteService
+    .remove(id)
+      .then(() => {
+        setPersons(persons.filter((p) => p.id !== id))
+        showNotification(`Deleted ${person.name}`, 'success')
+      })
+      .catch((error) => {
+        showNotification(
+          `Information of '${person.name}' was already removed from server`,
+          'error'
+        )
+        setPersons(persons.filter((p) => p.id !== id))
+      })
   }
-
-  noteService.remove(id).then(()=> {
-    setPersons(persons.filter(p => p.id !== id))
-  })
-}
 
 const handleFilterChange =(event) => setFilter(event.target.value)
 const handleNameChange =(event) => setNewName(event.target.value)
@@ -128,6 +168,9 @@ const handleNumberChange =(event) => setNewNumber(event.target.value)
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={notification.message}
+      type={notification.type}/>
 
     <Filter filter={filter} handleFilterChange={handleFilterChange} />
 

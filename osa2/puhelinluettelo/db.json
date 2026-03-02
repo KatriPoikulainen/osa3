@@ -1,19 +1,9 @@
 {
   "persons": [
     {
-      "name": "Arto Hellas",
-      "number": "040-123456",
-      "id": "1"
-    },
-    {
       "name": "Ada Lovelace",
       "number": "39-44-5323523",
       "id": "2"
-    },
-    {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id": "3"
     },
     {
       "name": "Mary Poppendieck",
@@ -21,34 +11,24 @@
       "id": "4"
     },
     {
-      "id": "5e3c",
-      "name": "Roope Ankka",
-      "number": "283091237"
+      "id": "6e28",
+      "name": "Minni Hiiri",
+      "number": "239847"
     },
     {
-      "id": "fbb3",
-      "name": "Milla Magia",
-      "number": "978301"
+      "id": "e310",
+      "name": "Mikki Hiiri",
+      "number": "236946"
     },
     {
-      "id": "c71d",
-      "name": "Mikko Mallikas",
-      "number": "249780124"
-    },
-    {
-      "id": "a1f6",
+      "id": "69de",
       "name": "Iines Ankka",
-      "number": "479487"
+      "number": "37294739"
     },
     {
-      "id": "c0af",
-      "name": "Aku Ankka",
-      "number": "821038912"
-    },
-    {
-      "id": "1612",
+      "id": "5215",
       "name": "Hessu Hopo",
-      "number": "893402948"
+      "number": "97592847"
     }
   ]
 }
