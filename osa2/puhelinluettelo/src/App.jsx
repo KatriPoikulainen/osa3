@@ -138,6 +138,8 @@ const handleFilterChange =(event) => setFilter(event.target.value)
 const handleNameChange =(event) => setNewName(event.target.value)
 const handleNumberChange =(event) => setNewNumber(event.target.value)
 
+  console.log(persons)
+
   const personsToShow = persons.filter(person =>
     person.name.toLowerCase().includes(filter.toLowerCase())
   )
