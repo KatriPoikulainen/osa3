@@ -86,7 +86,31 @@ const showNotification = (message, type) => {
     const existingPerson = persons.find((p)=> p.name === name)
 
 if (existingPerson) {
-  showNotification('Name must be unique', 'error')
+  const ok = window.confirm(
+    `${name} is already added to phonebook, replace the old number with a new one?`
+  )
+  if (!ok) return
+
+  const updatedPerson = { ...existingPerson, number }
+
+  noteService
+    .update(existingPerson.id, updatedPerson)
+    .then((updated) => {
+      setPersons(
+        persons.map((p) => (p.id !== existingPerson.id ? p : updated))
+      )
+      setNewName('')
+      setNewNumber('')
+      showNotification(`Updated ${updated.name}`, 'success')
+    })
+    .catch(() => {
+      showNotification(
+        `Information of '${existingPerson.name}' was already removed from server`,
+        'error'
+      )
+      setPersons(persons.filter((p) => p.id !== existingPerson.id))
+    })
+
   return
 }
 
