@@ -129,10 +129,11 @@ if (existingPerson) {
       setNewNumber('')
         showNotification(`Added ${createdPerson.name}`, 'success')
       })
-      .catch((error) => {
-        showNotification('Adding a person failed', 'error')
-      })
+    .catch((error) => {
+     showNotification(error.response.data.error, 'error')
+    })
   }
+
 
 
       
